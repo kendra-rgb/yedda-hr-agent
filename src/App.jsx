@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import { createRoot } from 'react-dom/client'
 
 const DEPTS = ['Engineering','DevOps','Customer Service','Sales','HR / People','Operations','Finance','Marketing']
-
 const SUBTASKS = [
   "Create offer letter","Create NDA","Create contract",
   "Send welcome email","Send esign documents","Create email",
@@ -49,20 +49,17 @@ select option{background:var(--bg3)}
 textarea{resize:vertical;line-height:1.6}
 .preview-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;font-size:12px;color:var(--text2);line-height:1.9;white-space:pre-wrap;max-height:200px;overflow-y:auto;font-family:'DM Mono',monospace;margin-bottom:16px}
 .btn{width:100%;padding:13px;border:none;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s}
-.btn-accent{background:var(--accent);color:#0f0f0d}
-.btn-accent:hover{background:#d4b87a}
-.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
-.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-accent{background:var(--accent);color:#0f0f0d}.btn-accent:hover{background:#d4b87a}
+.btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .err{background:var(--red-bg);border:1px solid #3d1010;border-radius:var(--radius-sm);padding:11px 14px;font-size:12px;color:var(--red);margin-bottom:12px}
 .handoff{background:#0f1a0f;border:2px solid var(--teal);border-radius:var(--radius);padding:20px;margin-top:8px}
-.handoff-title{font-size:12px;font-family:'DM Mono',monospace;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
-.handoff-instruction{font-size:13px;color:var(--text2);margin-bottom:12px;padding:10px 14px;background:var(--bg4);border-radius:var(--radius-sm);border-left:3px solid var(--teal)}
+.handoff-title{font-size:12px;font-family:'DM Mono',monospace;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+.handoff-note{font-size:13px;color:var(--text2);margin-bottom:12px;padding:10px 14px;background:var(--bg4);border-radius:var(--radius-sm);border-left:3px solid var(--teal)}
 .handoff-body{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);line-height:1.9;margin-bottom:14px;white-space:pre-wrap}
 .copy-btn{width:100%;padding:12px;background:var(--teal-bg);color:var(--teal);border:1px solid var(--teal);border-radius:var(--radius-sm);font-family:'DM Mono',monospace;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s}
-.copy-btn:hover{background:#0f2e20}
-.copy-btn.copied{background:var(--teal);color:#0f0f0d}
+.copy-btn:hover{background:#0f2e20}.copy-btn.copied{background:var(--teal);color:#0f0f0d}
 .asana-preview{background:#0a1a12;border:1px solid #1a3a28;border-radius:var(--radius-sm);padding:14px;margin-bottom:16px}
 .asana-name{font-size:13px;font-family:'DM Mono',monospace;color:#6ddcb0;margin-bottom:4px}
 .asana-section{font-size:11px;color:#4db896;font-family:'DM Mono',monospace;margin-bottom:10px}
@@ -70,13 +67,13 @@ textarea{resize:vertical;line-height:1.6}
 .subtask-pill{font-size:11px;font-family:'DM Mono',monospace;background:var(--bg4);border:1px solid var(--border);border-radius:20px;padding:2px 8px;color:var(--text3)}
 .spinner{width:16px;height:16px;border:2px solid rgba(15,15,13,.3);border-top-color:#0f0f0d;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.claude-banner{background:#1a1400;border:1px solid #3d3000;border-radius:var(--radius-sm);padding:13px 16px;font-size:13px;color:#c8a030;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start}
-.claude-banner strong{color:#e8c060;display:block;margin-bottom:3px}
+.banner{background:#1a1400;border:1px solid #3d3000;border-radius:var(--radius-sm);padding:13px 16px;font-size:13px;color:#c8a030;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start}
+.banner strong{color:#e8c060;display:block;margin-bottom:3px}
 @media(max-width:520px){.g2{grid-template-columns:1fr}.btn-row{grid-template-columns:1fr}}
 `
 
 function parseReply(text) {
-  const get = ps => { for (const p of ps) { const m=text.match(p); if(m&&m[1]&&m[1].trim().length>1) return m[1].trim(); } return '' }
+  const get = ps => { for (const p of ps) { const m=text.match(p); if(m&&m[1]&&m[1].trim().length>1) return m[1].trim() } return '' }
   return {
     name: get([/(?:full name|name)[:\s]+([^\n]+)/i,/^1[\.\)]\s*([^\n]+)/m]),
     address: get([/(?:permanent address|address)[:\s]+([^\n]+)/i,/^2[\.\)]\s*([^\n]+)/m]),
@@ -111,39 +108,36 @@ function CopyButton({ text }) {
   }
   return (
     <button className={`copy-btn${copied?' copied':''}`} onClick={handleCopy}>
-      {copied ? '✓ Copied — paste this into Claude chat ↓' : '📋 Copy command → paste into Claude chat'}
+      {copied ? '✓ Copied — paste into Claude chat ↓' : '📋 Copy command → paste into Claude chat'}
     </button>
   )
 }
 
-export default function App() {
+function App() {
   const [tab, setTab] = useState(1)
   const [doneTabs, setDoneTabs] = useState([])
-
   const [firstName, setFirstName] = useState('')
-  const [email, setEmail]         = useState('')
-  const [role, setRole]           = useState('')
-  const [salary, setSalary]       = useState('')
-  const [manager, setManager]     = useState('')
-  const [location, setLocation]   = useState('')
-  const [dept, setDept]           = useState('')
-  const [err1, setErr1]           = useState('')
+  const [email, setEmail] = useState('')
+  const [role, setRole] = useState('')
+  const [salary, setSalary] = useState('')
+  const [manager, setManager] = useState('')
+  const [location, setLocation] = useState('')
+  const [dept, setDept] = useState('')
+  const [err1, setErr1] = useState('')
   const [showHandoff1, setShowHandoff1] = useState(false)
-
-  const [reply, setReply]         = useState('')
-  const [err2, setErr2]           = useState('')
+  const [reply, setReply] = useState('')
+  const [err2, setErr2] = useState('')
   const [extracting, setExtracting] = useState(false)
-
-  const [name, setName]           = useState('')
-  const [dob, setDob]             = useState('')
-  const [phone, setPhone]         = useState('')
+  const [name, setName] = useState('')
+  const [dob, setDob] = useState('')
+  const [phone, setPhone] = useState('')
   const [startDate, setStartDate] = useState('')
-  const [address, setAddress]     = useState('')
+  const [address, setAddress] = useState('')
   const [nationality, setNationality] = useState('')
-  const [passport, setPassport]   = useState('')
-  const [passExp, setPassExp]     = useState('')
-  const [bank, setBank]           = useState('')
-  const [err3, setErr3]           = useState('')
+  const [passport, setPassport] = useState('')
+  const [passExp, setPassExp] = useState('')
+  const [bank, setBank] = useState('')
+  const [err3, setErr3] = useState('')
   const [showHandoff3, setShowHandoff3] = useState(false)
 
   const emailBody = () => `Hi ${firstName||'[Candidate]'},
@@ -175,32 +169,9 @@ Please accept the offer by replying to us the following information:
 Best,
 Kendra · Talent Acquisition, Yedda.ai`
 
-  const chatCmd1 = () =>
-`DRAFT_OFFER_EMAIL
-candidate: ${firstName}
-to: ${email}
-role: ${role}
-salary: ${salary}
-manager: ${manager}
-location: ${location}
-dept: ${dept}`
-
+  const cmd1 = () => `DRAFT_OFFER_EMAIL\ncandidate: ${firstName}\nto: ${email}\nrole: ${role}\nsalary: ${salary}\nmanager: ${manager}\nlocation: ${location}\ndept: ${dept}`
   const taskName = () => `${name||'[Name]'} - ${role||'[Role]'} - ${location||'[Location]'} (${manager||'[Manager]'})`
-
-  const chatCmd3 = () =>
-`CREATE_ASANA_ONBOARD
-task: ${taskName()}
-dept: ${dept}
-manager: ${manager}
-start: ${startDate}
-salary: ${salary}
-phone: ${phone||'TBD'}
-address: ${address||'TBD'}
-nationality: ${nationality||'TBD'}
-passport: ${passport||'TBD'} exp: ${passExp||'TBD'}
-dob: ${dob||'TBD'}
-bank: ${bank||'TBD'}
-welcome_email_to: ${email}`
+  const cmd3 = () => `CREATE_ASANA_ONBOARD\ntask: ${taskName()}\ndept: ${dept}\nmanager: ${manager}\nstart: ${startDate}\nsalary: ${salary}\nphone: ${phone||'TBD'}\naddress: ${address||'TBD'}\nnationality: ${nationality||'TBD'}\npassport: ${passport||'TBD'} exp: ${passExp||'TBD'}\ndob: ${dob||'TBD'}\nbank: ${bank||'TBD'}\nwelcome_email_to: ${email}`
 
   function handleDraftEmail() {
     if (!firstName||!email||!role||!salary||!manager||!location||!dept) { setErr1('Please fill in all fields.'); return }
@@ -237,7 +208,6 @@ welcome_email_to: ${email}`
     <>
       <style>{css}</style>
       <div className="wrap">
-
         <div className="header">
           <div className="hicon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0f0f0d" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -252,12 +222,9 @@ welcome_email_to: ${email}`
           <div className="badge">YEDDA.AI</div>
         </div>
 
-        <div className="claude-banner">
+        <div className="banner">
           <span style={{fontSize:20}}>💬</span>
-          <div>
-            <strong>How this works</strong>
-            Fill the form → copy the command → paste it into your Claude chat window. Claude handles Gmail and Asana directly.
-          </div>
+          <div><strong>How this works</strong>Fill the form → copy the command → paste it into your Claude chat. Claude handles Gmail and Asana directly.</div>
         </div>
 
         <div className="tab-nav">
@@ -300,10 +267,10 @@ welcome_email_to: ${email}`
                 </button>
               : <>
                   <div className="handoff">
-                    <div className="handoff-title">✓ Ready — copy &amp; paste into Claude</div>
-                    <div className="handoff-instruction">Paste this into your Claude chat. Claude will create the Gmail draft in <strong>kendra@yedda.ai</strong> instantly.</div>
-                    <div className="handoff-body">{chatCmd1()}</div>
-                    <CopyButton text={chatCmd1()}/>
+                    <div className="handoff-title">✓ Ready — copy &amp; paste into Claude chat</div>
+                    <div className="handoff-note">Paste this into Claude chat. Claude creates the Gmail draft in kendra@yedda.ai instantly.</div>
+                    <div className="handoff-body">{cmd1()}</div>
+                    <CopyButton text={cmd1()}/>
                   </div>
                   <button className="btn btn-ghost" style={{marginTop:10}} onClick={() => setTab(2)}>Continue to Step 2 →</button>
                 </>
@@ -314,10 +281,10 @@ welcome_email_to: ${email}`
         {tab===2 && (
           <div className="card">
             <div className="card-title">Paste candidate's reply</div>
-            <p style={{fontSize:13,color:'var(--text2)',marginBottom:14}}>Paste the full reply email — Claude AI extracts all fields automatically.</p>
+            <p style={{fontSize:13,color:'var(--text2)',marginBottom:14}}>Paste the full reply — Claude AI extracts all fields automatically.</p>
             <div className="g1">
               <textarea rows={9} value={reply} onChange={e=>setReply(e.target.value)}
-                placeholder={"Hi Kendra, I accept!\n\n1. Full name: Nguyen Thi Linh\n2. Address: 123 Le Duan, Hanoi\n3. Phone: +84 912 345 678\n4. Start date: June 16th, 2026\n5. Passport: B1234567\n6. Bank: Vietcombank 1234567890\n9. DOB: 15/03/1995"}/>
+                placeholder={"Hi Kendra, I accept!\n\n1. Full name: Nguyen Thi Linh\n2. Address: 123 Le Duan, Hanoi\n3. Phone: +84 912 345 678\n4. Start date: June 16th, 2026\n5. Passport: B1234567\n9. DOB: 15/03/1995"}/>
             </div>
             {err2 && <div className="err">{err2}</div>}
             <div className="btn-row">
@@ -334,11 +301,11 @@ welcome_email_to: ${email}`
             <div className="card-title">Review &amp; create Asana task</div>
             <div className="g2">
               <div><label>Full name</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="Full name"/></div>
-              <div><label>Date of birth</label><input value={dob} onChange={e=>setDob(e.target.value)} placeholder="e.g. 15/03/1995"/></div>
+              <div><label>Date of birth</label><input value={dob} onChange={e=>setDob(e.target.value)} placeholder="15/03/1995"/></div>
             </div>
             <div className="g2">
               <div><label>Phone</label><input value={phone} onChange={e=>setPhone(e.target.value)} placeholder="+84 ..."/></div>
-              <div><label>Start date</label><input value={startDate} onChange={e=>setStartDate(e.target.value)} placeholder="e.g. June 16, 2026"/></div>
+              <div><label>Start date</label><input value={startDate} onChange={e=>setStartDate(e.target.value)} placeholder="June 16, 2026"/></div>
             </div>
             <div className="g1"><label>Permanent address</label><input value={address} onChange={e=>setAddress(e.target.value)} placeholder="Full address"/></div>
             <div className="g2">
@@ -346,7 +313,7 @@ welcome_email_to: ${email}`
               <div><label>Passport / ID</label><input value={passport} onChange={e=>setPassport(e.target.value)} placeholder="e.g. B1234567"/></div>
             </div>
             <div className="g2" style={{marginBottom:16}}>
-              <div><label>Passport expiry</label><input value={passExp} onChange={e=>setPassExp(e.target.value)} placeholder="e.g. 01/01/2030"/></div>
+              <div><label>Passport expiry</label><input value={passExp} onChange={e=>setPassExp(e.target.value)} placeholder="01/01/2030"/></div>
               <div><label>Bank details</label><input value={bank} onChange={e=>setBank(e.target.value)} placeholder="Bank, account no."/></div>
             </div>
             <div className="asana-preview">
@@ -365,16 +332,17 @@ welcome_email_to: ${email}`
                   </button>
                 </div>
               : <div className="handoff">
-                  <div className="handoff-title">✓ Ready — copy &amp; paste into Claude</div>
-                  <div className="handoff-instruction">Paste this into Claude chat. Claude creates the task + 12 subtasks + Offer Letter + NDA + welcome email.</div>
-                  <div className="handoff-body">{chatCmd3()}</div>
-                  <CopyButton text={chatCmd3()}/>
+                  <div className="handoff-title">✓ Ready — copy &amp; paste into Claude chat</div>
+                  <div className="handoff-note">Paste into Claude chat. Claude creates task + 12 subtasks + docs + welcome email.</div>
+                  <div className="handoff-body">{cmd3()}</div>
+                  <CopyButton text={cmd3()}/>
                 </div>
             }
           </div>
         )}
-
       </div>
     </>
   )
 }
+
+createRoot(document.getElementById('root')).render(<App />)
